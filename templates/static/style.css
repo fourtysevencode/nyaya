@@ -83,6 +83,34 @@ nav a:hover {
     padding: 0;
 }
 
+#fir_input {
+    display: none;
+} /* hides input */
+
+#upload-label {
+    background-color: #b8976a;
+    color: #1a1a1a;
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Jost', sans-serif;
+    font-size: 16px;
+    margin-left: 40px;
+}
+
+#upload-label:hover {
+    background-color: #c8a97e;
+}
+
+#fir_title {
+    padding: 40px;
+    padding-bottom: 10px;
+}
+
+#upload-btn {
+    display: none;
+}
+
 @media (max-width: 768px) {
     body {
         padding: 0 24px;
