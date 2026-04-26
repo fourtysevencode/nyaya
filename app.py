@@ -6,14 +6,24 @@ from dotenv import load_dotenv
 import os
 from google import genai
 from google.genai import types
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"], # allowing Cross Origin Resource Sharing
+)
+
 load_dotenv()
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 client = genai.Client(api_key=GEMINI_API_KEY)
 templates = Jinja2Templates(directory="templates")
 app.mount("/static", StaticFiles(directory="templates/static"), name="static")
+app.mount("/favicon", StaticFiles(directory="templates/favicon"), name="favicon")
 
 prompt = """
 You are a legal assistant helping ordinary Indian citizens understand FIR (First Information Report) documents.
