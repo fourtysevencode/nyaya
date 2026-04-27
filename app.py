@@ -13,9 +13,12 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"], # allowing Cross Origin Resource Sharing
+    allow_origins=[
+        "https://nyaya.ronakbuilds.tech",
+        "https://fourtysevencode-nyaya.hf.space"
+    ],
+    allow_methods=["GET", "POST"],
+    allow_headers=["Content-Type"],
 )
 
 load_dotenv()
