@@ -1,7 +1,5 @@
 fastapi
 jinja2
-pandas
-numpy
 pydantic
 uvicorn
 requests
