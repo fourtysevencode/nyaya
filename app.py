@@ -7,6 +7,7 @@ import os
 from google import genai
 from google.genai import types
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 app = FastAPI()
 
@@ -60,22 +61,33 @@ async def home(request: Request):
     return templates.TemplateResponse(request, "index.html")
 
 @app.get("/fir-analysis", response_class=HTMLResponse) # HTML response, not json
-async def fir_analysis(request: Request):
+async def fir_analysis_page(request: Request):
     return templates.TemplateResponse(request, "fir_summary.html")
 
-@app.post("/fir_analysis")
-async def analysis(file: UploadFile = File(...)): # type hint for formdata and to extract whatever is in file and . . . means its required
-    contents = await file.read() # takes time
+@app.get("/section-finder", response_class=HTMLResponse) # HTML response, not json
+async def section_finder_page(request: Request):
+    return templates.TemplateResponse(request, "section_finder.html")
 
-    response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        config=types.GenerateContentConfig(
-            system_instruction=prompt,
-            max_output_tokens=3000
-        ),
-        contents=types.Part.from_bytes( # attaching pdf
-            data=contents,
-            mime_type="application/pdf"
+@app.post("/fir_analysis")
+async def analysis(file: UploadFile = File(...)):
+    try:
+        contents = await file.read()
+
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            config=types.GenerateContentConfig(
+                system_instruction=prompt,
+                max_output_tokens=3000
+            ),
+            contents=types.Part.from_bytes(
+                data=contents,
+                mime_type="application/pdf"
+            )
         )
-    )
-    return {"analysis": response.text}
+        return {"analysis": response.text}
+    
+    except Exception as e:
+        return JSONResponse(
+            status_code=500,
+            content={"error": str(e)}
+        )

@@ -128,7 +128,7 @@ nav a:hover {
     border: 2px #b8976a solid;
     border-radius: 9px;
     margin-left: 40px;
-    margin-top: 50px;
+    margin-top: 20px;
 }
 
 #incident-report {
@@ -144,6 +144,14 @@ nav a:hover {
     resize: none;
     box-sizing: border-box;
     min-height: 50px;
+}
+
+#result {
+    padding-bottom: 2px;
+}
+
+#input_image_name {
+    padding-bottom: 3px;
 }
 
 @media (max-width: 768px) {

@@ -16,14 +16,25 @@ btn.addEventListener('click', async () => {
         console.log("Operation Ended (No file attached)")
     } else {
         const fir = uploaded_files.files[0]
-        const formData = new FormData() // key value pairs that can be sent through fetch()
-        formData.append('file', fir) // appending key, value (value in binary)
-        const res = await fetch(`${server_url}/fir_analysis`, { // `` creates a template (formatted string)
+        const formData = new FormData()
+        formData.append('file', fir)
+        const res = await fetch(`${server_url}/fir_analysis`, {
             method: "POST",
-            body: formData // json of file: fir
+            body: formData
         })
         const data = await res.json()
-        result.innerHTML = marked.parse(data.analysis) // converting to marksown with cloudflare marked and updating result
+
+        if (data.error) {
+            if (data.error.includes("503")) {
+                result.innerText = "there's high demand right now, retry in a minute."
+            } else {
+                result.innerText = `something went wrong: ${data.error}`
+            }
+            console.log("Operation failed:", data.error)
+            return
+        }
+
+        result.innerHTML = marked.parse(data.analysis)
         console.log("Operation completed")
     }
 })
