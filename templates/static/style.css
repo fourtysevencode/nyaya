@@ -7,6 +7,12 @@ body {
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.2'/%3E%3C/svg%3E");
 }
 
+#logo {
+    display: flex;
+    justify-content: flex-start;
+    padding-top:30px
+}
+
 h1 {
     color: #1a1a1a;
     font-family: 'Playfair Display', Georgia, serif;
@@ -239,5 +245,17 @@ nav a:hover {
 
     #input_image_name {
         margin: 0px;
+    }
+
+    #result {
+        padding-left: 20px;
+        padding-right: 20px;
+        overflow-x: hidden;
+        max-width: 100%;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+        #logo {
+        display: none;
     }
 }
