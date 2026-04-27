@@ -225,6 +225,7 @@ nav a:hover {
         margin-left: 0;
         display: block;
         text-align: center;
+        margin-bottom: 20px;
     }
 
     #incident-report {
@@ -234,5 +235,9 @@ nav a:hover {
         padding: 16px;
         max-width: 100%;
         min-height: 90px; /* enough for placeholder to breathe */
+    }
+
+    #input_image_name {
+        margin: 0px;
     }
 }
