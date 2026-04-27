@@ -65,7 +65,7 @@ async def fir_analysis(request: Request):
 
 @app.post("/fir_analysis")
 async def analysis(file: UploadFile = File(...)): # type hint for formdata and to extract whatever is in file and . . . means its required
-    contents = await file.read()
+    contents = await file.read() # takes time
 
     response = client.models.generate_content(
         model="gemini-2.5-flash",
