@@ -24,7 +24,7 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 client = genai.Client(api_key=GEMINI_API_KEY)
 templates = Jinja2Templates(directory="templates")
 app.mount("/static", StaticFiles(directory="templates/static"), name="static")
-app.mount("/favicon", StaticFiles(directory="templates/favicon"), name="favicon")
+app.mount("/favicon", StaticFiles(directory="templates/static/favicon"), name="favicon")
 
 prompt = """
 You are a legal assistant helping ordinary Indian citizens understand FIR (First Information Report) documents.
