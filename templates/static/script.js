@@ -2,7 +2,7 @@ const btn = document.querySelector("#upload-btn")
 const result = document.querySelector("#result")
 const uploaded_files = document.querySelector("#fir_input")
 const input_image_name = document.querySelector('#input_image_name')
-const server_url = 'http://localhost:8000'
+const server_url = 'https://fourtysevencode-nyaya.hf.space'
 
 uploaded_files.addEventListener('change', () => {
     input_image_name.innerText = uploaded_files.files[0].name
