@@ -1,2 +1,8 @@
+# Environment Variables
 .env
+
+# Local cache files and directories
 __pycache__
+
+# Python local virtural environments
+.venv

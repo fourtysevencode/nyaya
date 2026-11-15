@@ -15,7 +15,6 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "https://nyaya.ronakbuilds.tech",
-        "https://fourtysevencode-nyaya.hf.space"
     ],
     allow_methods=["GET", "POST"],
     allow_headers=["Content-Type"],
