@@ -6,3 +6,6 @@ __pycache__
 
 # Python local virtural environments
 .venv
+
+# VS Code config files
+.vscode

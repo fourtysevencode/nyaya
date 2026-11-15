@@ -4,5 +4,6 @@ pydantic
 uvicorn
 requests
 python-dotenv
-google-genai
+openai
 python-multipart
+python-dotenv
