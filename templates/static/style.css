@@ -91,7 +91,7 @@ nav a:hover {
     display: none;
 }
 
-#upload-label {
+.upload-label {
     background-color: #b8976a;
     color: #1a1a1a;
     padding: 12px 24px;

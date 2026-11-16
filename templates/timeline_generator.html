@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>FIR Analysis</title>
     <link rel="stylesheet" href="/static/style.css">
+    <link rel="script" href="/static/utils/timeline.js"
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
@@ -22,5 +23,11 @@
 
     <h2 id="fir_title">Timeline Generator</h2>
     <p id="fir-subtext">Upload all applicable evidence and view a timeline of it.</p>
+
+    <label for="timeline_input" class="upload-label">choose file</label>
+    <input type="file" id="timeline_input" accept=".pdf, .docx, .mp3, .mp4" />
+
+    <label for="analyze" class="upload-label">analyze</label>
+    <button id="timeline-submit"></button>
 </body>
 </html>
