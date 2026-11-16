@@ -5,9 +5,12 @@ export default function TimelineGenerator() {
   const [fileNames, setFileNames] = useState([])
 
   const handleFileChange = () => {
-    setFileNames(Array.from(inputRef.current.files).map((f) => f.name))
+    let fileNamesArray = Array.from(inputRef.current.files).map((f) => f.name)
+    setFileNames(fileNamesArray)
+    console.log(fileNamesArray)
   }
 
+  // React element
   return (
     <>
       <h2 id="fir_title">Timeline Generator</h2>
@@ -20,7 +23,7 @@ export default function TimelineGenerator() {
           ref={inputRef}
           type="file"
           id="timeline_input"
-          accept=".pdf, .docx, .mp3, .mp4"
+          accept=".pdf, .docx, .mp3, .mp4, .jpeg, .jpg, .png, .wav, .mov, .heif, .heic"
           onChange={handleFileChange}
           multiple
         />
