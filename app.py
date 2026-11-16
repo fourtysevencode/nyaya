@@ -1,13 +1,13 @@
 from fastapi import FastAPI, Request, UploadFile, File
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 from openai import OpenAI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
 import os
 import base64
+from pathlib import Path
 
 app = FastAPI()
 
@@ -29,9 +29,22 @@ client = OpenAI(
     base_url="https://openrouter.ai/api/v1"
 )
 
-templates = Jinja2Templates(directory="templates")
-app.mount("/static", StaticFiles(directory="templates/static"), name="static")
-app.mount("/favicon", StaticFiles(directory="templates/static/favicon"), name="favicon")
+# Built React (Vite) frontend is served as a static SPA
+DIST_DIR = Path("frontend/dist")
+app.mount("/assets", StaticFiles(directory=DIST_DIR / "assets"), name="assets")
+app.mount("/favicon", StaticFiles(directory=DIST_DIR / "favicon"), name="favicon")
+
+
+async def serve_spa(full_path: str):
+    """Serve the built SPA. Known routes get index.html from the top level,
+    anything else gets the app's 404 page."""
+    page = DIST_DIR / f"{full_path}.html"
+    if page.is_file():
+        return FileResponse(page)
+    index = DIST_DIR / "index.html"
+    if index.is_file():
+        return FileResponse(index)
+    return JSONResponse(status_code=404, content={"detail": "Frontend not built. Run `npm run build` in frontend/."})
 
 prompt = """
 You are a legal assistant helping ordinary Indian citizens understand FIR (First Information Report) documents.
@@ -55,20 +68,24 @@ Be concise, clear, and compassionate. The person reading this may be in a stress
 """
 
 @app.get("/", response_class=HTMLResponse)
-async def home(request: Request):
-    return templates.TemplateResponse(request, "index.html")
+async def home():
+    return await serve_spa("index")
 
 @app.get("/fir-analysis", response_class=HTMLResponse)
-async def fir_analysis_page(request: Request):
-    return templates.TemplateResponse(request, "fir_summary.html")
+async def fir_analysis_page():
+    return await serve_spa("fir-analysis")
 
 @app.get("/section-finder", response_class=HTMLResponse)
-async def section_finder_page(request: Request):
-    return templates.TemplateResponse(request, "section_finder.html")
+async def section_finder_page():
+    return await serve_spa("section-finder")
 
 @app.get("/timeline-generator", response_class=HTMLResponse)
-async def timeline_generator_page(request: Request):
-    return templates.TemplateResponse(request, "timeline_generator.html")
+async def timeline_generator_page():
+    return await serve_spa("timeline-generator")
+
+@app.get("/{path:path}", response_class=HTMLResponse)
+async def spa_fallback(path: str):
+    return await serve_spa(path)
 
 @app.post("/fir_analysis")
 async def analysis(file: UploadFile = File(...)):

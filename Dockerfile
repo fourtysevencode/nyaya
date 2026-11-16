@@ -4,6 +4,12 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
+# Build the React (Vite) frontend
+COPY frontend/package.json frontend/package-lock.json ./frontend/
+RUN npm install --prefix frontend
+COPY frontend ./frontend
+RUN npm run build --prefix frontend
+
 COPY . .
 
 EXPOSE 7860
