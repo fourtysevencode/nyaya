@@ -29,22 +29,35 @@ client = OpenAI(
     base_url="https://openrouter.ai/api/v1"
 )
 
-# Built React (Vite) frontend is served as a static SPA
+# Built React (Vite) frontend is served as a static SPA.
+# Mounts are created lazily so the backend can still run before the
+# frontend has been built (`npm run build` in frontend/).
 DIST_DIR = Path("frontend/dist")
-app.mount("/assets", StaticFiles(directory=DIST_DIR / "assets"), name="assets")
-app.mount("/favicon", StaticFiles(directory=DIST_DIR / "favicon"), name="favicon")
+
+
+def mount(name: str, path: str):
+    directory = DIST_DIR / path
+    if directory.is_dir():
+        app.mount(f"/{name}", StaticFiles(directory=directory), name=name)
+
+
+mount("assets", "assets")
+mount("favicon", "favicon")
 
 
 async def serve_spa(full_path: str):
     """Serve the built SPA. Known routes get index.html from the top level,
     anything else gets the app's 404 page."""
+    index = DIST_DIR / "index.html"
+    if not index.is_file():
+        return JSONResponse(
+            status_code=503,
+            content={"detail": "Frontend not built. Run `npm install && npm run build --prefix frontend`."},
+        )
     page = DIST_DIR / f"{full_path}.html"
     if page.is_file():
         return FileResponse(page)
-    index = DIST_DIR / "index.html"
-    if index.is_file():
-        return FileResponse(index)
-    return JSONResponse(status_code=404, content={"detail": "Frontend not built. Run `npm run build` in frontend/."})
+    return FileResponse(index)
 
 prompt = """
 You are a legal assistant helping ordinary Indian citizens understand FIR (First Information Report) documents.
