@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom'
+import { NavLink, Outlet } from 'react-router-dom'
 
 const links = [
   { to: '/', label: 'Home' },
@@ -7,7 +7,7 @@ const links = [
   { to: '/timeline-generator', label: 'Timeline' },
 ]
 
-export default function Layout({ children }) {
+export default function Layout() {
   return (
     <>
       <nav>
@@ -24,7 +24,7 @@ export default function Layout({ children }) {
           </NavLink>
         ))}
       </nav>
-      {children}
+      <Outlet />
     </>
   )
 }
