@@ -13,10 +13,14 @@ This spins up both the FastAPI backend (`uvicorn` on port 8000) and the Vite Rea
 
 ## Deployment (Vercel)
 
-`vercel.json` builds the frontend and serves it as a static SPA. `/fir_analysis`
-requests are rewritten to the deployed backend (`nyaya.ronakbuilds.tech`). If the
-backend runs on a different host, update that rewrite destination. Also make sure
-the backend CORS list includes the Vercel deployment domain.
+Vercel deploys this repo as one project with two services (`vercel.json`):
+
+- **`frontend`** — Vite/React app in `frontend/`, public and serving everything (catch-all `/`)
+- **`app`** — FastAPI backend at the repo root, internal; reachable only via the public path `POST /fir_analysis`
+
+The frontend's `/fir_analysis` fetch resolves against the public origin and is
+routed to the backend by Vercel — no CORS and no bindings involved. Set
+`API_KEY` in the project's environment variables in the Vercel dashboard.
 
 ## Legacy
 
