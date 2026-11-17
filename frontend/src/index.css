@@ -17,6 +17,12 @@ nav {
     /* bright top edge — light catching the top of the material */
     border-top: 1px solid rgba(255, 255, 255, 0.5);
     transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    /* The material is true chrome: it bleeds to the viewport edges while its
+       contents stay aligned with the body's 60px gutters. */
+    margin-left: -60px;
+    margin-right: -60px;
+    padding-left: 60px;
+    padding-right: 60px;
 }
 
 /* Scroll edge effect, not a hard divider: a soft gold fade that only
@@ -252,6 +258,64 @@ a.card:active {
     color: #8c3d2e;
 }
 
+/* Markdown rendered inside the result box (FIR analysis, section finder). */
+#result h1,
+#result h2,
+#result h3,
+#result h4 {
+    font-family: 'Jost', sans-serif;
+    font-weight: 500;
+    font-size: 19px;
+    letter-spacing: 0.02em;
+    color: #1a1a1a;
+    margin: 18px 0 8px;
+    padding: 0;
+}
+
+#result h1:first-child,
+#result h2:first-child,
+#result h3:first-child {
+    margin-top: 4px;
+}
+
+#result p {
+    font-size: 17px;
+    line-height: 1.65;
+    margin: 8px 0;
+    max-width: none;
+}
+
+#result ul,
+#result ol {
+    margin: 4px 0 10px;
+    padding-left: 22px;
+}
+
+#result li {
+    font-family: 'Jost', sans-serif;
+    font-size: 17px;
+    line-height: 1.65;
+    color: #4a4a4a;
+    margin: 0 0 6px;
+}
+
+#result strong {
+    color: #1a1a1a;
+    font-weight: 500;
+}
+
+#result a {
+    color: #8a6b3e;
+}
+
+#result code {
+    font-family: ui-monospace, monospace;
+    font-size: 0.9em;
+    background-color: rgba(26, 26, 26, 0.06);
+    border-radius: 4px;
+    padding: 1px 5px;
+}
+
 #result {
     padding-bottom: 2px;
 }
@@ -278,6 +342,13 @@ a.card:active {
 @media (max-width: 768px) {
     body {
         padding: 0 16px;
+    }
+
+    nav {
+        margin-left: -16px;
+        margin-right: -16px;
+        padding-left: 16px;
+        padding-right: 16px;
     }
 
     h1 {
@@ -402,6 +473,27 @@ a.card:active {
 .page-narrow .timeline-empty,
 .page-narrow .timeline-message {
     padding: 1px 0 30px;
+}
+
+/* The FIR / section-finder tools share the same column as every other page. */
+.page-narrow .field {
+    padding: 0;
+}
+
+.page-narrow .outputs {
+    padding: 1px 0 30px;
+}
+
+.page-narrow .output_bg {
+    margin-left: 0;
+    max-width: none;
+}
+
+.page-narrow #incident-report {
+    width: 100%;
+    max-width: none;
+    font-size: 22px;
+    padding: 24px;
 }
 
 .dropzone {
@@ -1382,6 +1474,15 @@ a.card:active {
     .page-narrow .timeline-empty,
     .page-narrow .timeline-message {
         padding: 1px 0 20px;
+    }
+
+    .page-narrow .outputs {
+        padding: 1px 0 20px;
+    }
+
+    .page-narrow #incident-report {
+        padding: 16px;
+        font-size: 16px;
     }
 
     .timeline-toolbar {

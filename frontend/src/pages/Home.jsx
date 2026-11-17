@@ -13,8 +13,8 @@ const features = [
   },
   {
     to: '/section-finder',
-    label: 'Case Insights',
-    blurb: 'Find the law that applies to your situation and what it means, without the jargon.',
+    label: 'Section Finder',
+    blurb: 'Describe your situation and find the law that applies to it, explained without the jargon.',
   },
   {
     to: '/know-your-rights',
@@ -30,7 +30,7 @@ const features = [
 
 export default function Home() {
   return (
-    <>
+    <div className="page-narrow">
       <section className="hero">
         <h1>Nyaya</h1>
         <p>
@@ -52,6 +52,6 @@ export default function Home() {
           ))}
         </div>
       </section>
-    </>
+    </div>
   )
 }

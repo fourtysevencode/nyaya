@@ -259,8 +259,9 @@ export function buildLetter(scenarioId, data, evidenceTitles = [], extraAnnexure
   const annexures = ANNEXURES(evidenceTitles, extraAnnexures)
   const { heading, subject, body } = builder(data, annexures)
 
+  const place = data.authorityPlace || data.stationName || ''
   return [
-    `Place: ${data.authorityPlace || data.stationName || ''}`.replace(': ', ': ').trim(),
+    place ? `Place: ${place}` : '',
     `Date: ${dateLine()}`,
     '',
     heading,
