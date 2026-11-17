@@ -68,6 +68,9 @@ export default function TimelineGenerator() {
           }
           if (data.title) patch.title = data.title
           if (data.description) patch.description = data.description
+          // Model answered but couldn't pull anything out of the file —
+          // surface it on the card instead of failing silently.
+          if (!data.date && !data.title && !data.description) patch.status = 'unreadable'
         }
         patchItem(item.id, patch)
       } catch {

@@ -6,8 +6,12 @@ from dotenv import load_dotenv
 from openai import OpenAI
 from fastapi.middleware.cors import CORSMiddleware
 import os
+import ast
 import base64
 import json
+import logging
+import re
+from datetime import datetime
 from pathlib import Path
 
 app = FastAPI()
@@ -23,6 +27,8 @@ app.add_middleware(
 )
 
 load_dotenv()
+
+logger = logging.getLogger("nyaya")
 
 OPENAI_API_KEY = os.getenv("API_KEY")
 client = OpenAI(
@@ -169,11 +175,50 @@ def _parse_model_json(text: str) -> dict:
     start, end = text.find("{"), text.rfind("}")
     if start == -1 or end == -1:
         return {}
+    snippet = text[start : end + 1]
     try:
-        data = json.loads(text[start : end + 1])
+        data = json.loads(snippet)
         return data if isinstance(data, dict) else {}
     except ValueError:
+        pass
+    # Free models sometimes answer in Python literals ('single quotes').
+    try:
+        data = ast.literal_eval(snippet)
+        return data if isinstance(data, dict) else {}
+    except (ValueError, SyntaxError):
         return {}
+
+
+_DATE_FORMATS = (
+    "%d/%m/%Y",
+    "%d-%m-%Y",
+    "%d %B %Y",
+    "%d %b %Y",
+    "%B %d, %Y",
+    "%b %d, %Y",
+    "%d.%m.%Y",
+    "%Y/%m/%d",
+)
+
+
+def _normalise_date(value) -> str | None:
+    """Coerce a model-returned date into YYYY-MM-DD, or None."""
+    if not isinstance(value, str):
+        return None
+    text = value.strip()
+    if not text or text.lower() in {"null", "none", "unknown", "n/a", "na"}:
+        return None
+    try:
+        return datetime.fromisoformat(text[:10]).date().isoformat()
+    except ValueError:
+        pass
+    for fmt in _DATE_FORMATS:
+        try:
+            return datetime.strptime(text, fmt).date().isoformat()
+        except ValueError:
+            continue
+    logger.warning("timeline: could not normalise model date %r", text)
+    return None
 
 
 @app.post("/timeline_analyze")
@@ -236,18 +281,23 @@ async def timeline_analyze(file: UploadFile = File(...), hint_date: str = Form("
 
         response = client.chat.completions.create(
             model="openrouter/free",
-            max_tokens=500,
+            max_tokens=1000,
             messages=messages,
             extra_body=extra_body,
         )
-        data = _parse_model_json(response.choices[0].message.content)
+        raw = response.choices[0].message.content
+        logger.info("timeline: raw model output for %s: %r", filename, (raw or "")[:500])
+        data = _parse_model_json(raw)
+        if not data:
+            logger.warning("timeline: could not parse model output for %s", filename)
         return {
             "supported": supported,
-            "date": data.get("date") or None,
+            "date": _normalise_date(data.get("date")),
             "title": (data.get("title") or "").strip(),
             "description": (data.get("description") or "").strip(),
         }
     except Exception as e:
+        logger.exception("timeline_analyze failed for %s", locals().get("filename", "?"))
         return JSONResponse(
             status_code=500,
             content={"error": str(e)}

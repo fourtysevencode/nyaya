@@ -87,6 +87,7 @@ export default function EvidenceCard({ item, onEdit }) {
           )}
           {isWorking && <span className="evidence-reading">reading&hellip;</span>}
           {item.status === 'failed' && <span className="evidence-failed">AI unavailable</span>}
+          {item.status === 'unreadable' && <span className="evidence-unreadable">couldn't read file</span>}
         </div>
         <h3 className="evidence-title">{item.title || item.name}</h3>
         {item.description && <p className="evidence-desc">{item.description}</p>}
