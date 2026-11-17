@@ -166,13 +166,63 @@ Rules:
 """
 
 
-def _parse_model_json(text: str) -> dict:
-    """Best-effort extraction of a JSON object from a model response."""
+def _strip_fence(text: str) -> str:
     text = (text or "").strip()
     if text.startswith("```"):
         text = text.strip("`")
         if text.startswith("json"):
             text = text[4:]
+    return text
+
+
+def _message_text(message) -> str:
+    """Pull plain text out of a chat completion message.
+
+    Weak/routed free models answer in several shapes: plain string content,
+    a list of content parts, or (reasoning models) an empty content with the
+    answer buried in the reasoning field.
+    """
+    content = getattr(message, "content", None)
+    if isinstance(content, list):
+        parts = []
+        for part in content:
+            if isinstance(part, str):
+                parts.append(part)
+            elif isinstance(part, dict):
+                parts.append(part.get("text") or "")
+        content = "\n".join(part for part in parts if part)
+    if not content:
+        content = getattr(message, "reasoning", None) or ""
+    return _strip_fence(content)
+
+
+def _loads_relaxed(snippet: str):
+    """Try progressively more forgiving ways to parse an object.
+
+    strict=False allows literal newlines/tabs inside string values, which
+    weaker free models emit constantly; the trailing-comma pass and
+    ast.literal_eval cover python-style output.
+    """
+    attempts = (
+        lambda s: json.loads(s),
+        lambda s: json.loads(s, strict=False),
+        lambda s: ast.literal_eval(s),
+        lambda s: json.loads(re.sub(r",\s*([}\]])", r"\1", s), strict=False),
+        lambda s: ast.literal_eval(re.sub(r",\s*([}\]])", r"\1", s)),
+    )
+    for load in attempts:
+        try:
+            data = load(snippet)
+        except (ValueError, SyntaxError):
+            continue
+        if isinstance(data, dict):
+            return data
+    return {}
+
+
+def _parse_model_json(text: str) -> dict:
+    """Best-effort extraction of a JSON object from a model response."""
+    text = _strip_fence(text)
     # Free models love curly/smart quotes, which break strict JSON parsing.
     text = (
         text.replace("\u201c", '"')
@@ -183,39 +233,74 @@ def _parse_model_json(text: str) -> dict:
     start, end = text.find("{"), text.rfind("}")
     if start == -1 or end == -1:
         return {}
-    snippet = text[start : end + 1]
-    try:
-        data = json.loads(snippet)
-        return data if isinstance(data, dict) else {}
-    except ValueError:
-        pass
-    # Python-style literals ('single quotes', None, trailing commas).
-    try:
-        data = ast.literal_eval(snippet)
-        return data if isinstance(data, dict) else {}
-    except (ValueError, SyntaxError):
-        return {}
+    return _loads_relaxed(text[start : end + 1])
+
+
+def _unquote(value: str) -> str:
+    """Undo simple JSON escapes in a regex-salvaged string."""
+    return re.sub(
+        r"\\(.)",
+        lambda m: {"n": "\n", "t": "\t", "r": "\n"}.get(m.group(1), m.group(1)),
+        value,
+    )
+
+
+def _clean_salvaged(value: str) -> str:
+    """Trim structural junk a salvage match can swallow.
+
+    Happens when the model emitted unescaped quotes inside a value: the
+    match then runs to the end of the output and can pick up the rest of
+    the object (closing quotes, braces, the next `"key":` pair).
+    """
+    m = re.search(r'"\s*,\s*"(?:title|date|name|label|summary|description|desc)"\s*:', value, re.I)
+    if m:
+        value = value[: m.start()]
+    return re.sub(r'["\s}]+$', "", value).rstrip()
+
+
+def _salvage_string(text: str, key: str, limit: int) -> str:
+    """Pull one quoted value out of almost-JSON output, in two passes.
+
+    1. Proper-ish value: escaped quotes are skipped (\\."), and the closing
+       quote must be followed by the next key / end of object, so unescaped
+       quotes *inside* the value don't cut it short.
+    2. Output truncated mid-value (max_tokens cut it off): take the tail.
+    """
+    m = re.search(
+        rf'"{key}"\s*:\s*"((?:\\.|[^"\\]){{1,{limit}}}?)"\s*(?=[,}}\n]|$)',
+        text,
+        re.I | re.S,
+    )
+    if m:
+        return _unquote(m.group(1))
+    m = re.search(rf'"{key}"\s*:\s*"(.{{1,{limit}}})$', text, re.I | re.S)
+    if m:
+        return _clean_salvaged(_unquote(m.group(1)))
+    return ""
 
 
 def _salvage_fields(text: str) -> dict:
     """Last resort: regex the fields out of almost-JSON output.
 
     Runs when JSON parsing fails entirely, which happens with weaker free
-    models (unescaped quotes inside strings are enough to break it).
+    models (unescaped quotes or raw newlines inside strings are enough to
+    break it).
     """
     text = text or ""
     salvaged = {}
     date_match = re.search(r'"date"\s*:\s*"?(\d{4}-\d{2}-\d{2})', text, re.I)
     if date_match:
         salvaged["date"] = date_match.group(1)
-    title_match = re.search(r'"(?:title|name|label)"\s*:\s*"([^"\n]{2,120})"', text, re.I)
-    if title_match:
-        salvaged["title"] = title_match.group(1)
-    description_match = re.search(
-        r'"(?:description|summary|desc)"\s*:\s*"([^"\n]{2,600})"', text, re.I
+    title = _salvage_string(text, "title", 120) or _salvage_string(text, "name", 120) or _salvage_string(text, "label", 120)
+    if title:
+        salvaged["title"] = title
+    description = (
+        _salvage_string(text, "description", 600)
+        or _salvage_string(text, "summary", 600)
+        or _salvage_string(text, "desc", 600)
     )
-    if description_match:
-        salvaged["description"] = description_match.group(1)
+    if description:
+        salvaged["description"] = description
     return salvaged
 
 
@@ -263,6 +348,14 @@ async def timeline_analyze(file: UploadFile = File(...), hint_date: str = Form("
         contents = await file.read()
         content_type = file.content_type or ""
         filename = (file.filename or "evidence").lower()
+        # The client sends the file's own metadata date as a hint - pass it
+        # through to the model instead of ignoring it.
+        hint = ""
+        if (hint_date or "").strip():
+            hint = (
+                f" The file's metadata date is {hint_date.strip()}. Prefer a date"
+                " found inside the document itself when they differ."
+            )
 
         if content_type.startswith("image/"):
             base64_file = base64.b64encode(contents).decode("utf-8")
@@ -271,7 +364,7 @@ async def timeline_analyze(file: UploadFile = File(...), hint_date: str = Form("
                 {
                     "role": "user",
                     "content": [
-                        {"type": "text", "text": "Extract the date, title and description of this evidence image."},
+                        {"type": "text", "text": f"Extract the date, title and description of this evidence image.{hint}"},
                         {"type": "image_url", "image_url": {"url": f"data:{content_type};base64,{base64_file}"}},
                     ],
                 },
@@ -285,7 +378,7 @@ async def timeline_analyze(file: UploadFile = File(...), hint_date: str = Form("
                 {
                     "role": "user",
                     "content": [
-                        {"type": "text", "text": "Extract the date, title and description of this evidence document."},
+                        {"type": "text", "text": f"Extract the date, title and description of this evidence document.{hint}"},
                         {
                             "type": "file",
                             "file": {
@@ -311,11 +404,11 @@ async def timeline_analyze(file: UploadFile = File(...), hint_date: str = Form("
 
         response = client.chat.completions.create(
             model="openrouter/free",
-            max_tokens=1000,
+            max_tokens=2000,
             messages=messages,
             extra_body=extra_body,
         )
-        raw = response.choices[0].message.content
+        raw = _message_text(response.choices[0].message)
         logger.info("timeline: raw model output for %s: %r", filename, (raw or "")[:500])
         data = _parse_model_json(raw)
         if not (data.get("date") or data.get("title") or data.get("description")):
