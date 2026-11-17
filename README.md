@@ -16,11 +16,13 @@ This spins up both the FastAPI backend (`uvicorn` on port 8000) and the Vite Rea
 Vercel deploys this repo as one project with two services (`vercel.json`):
 
 - **`frontend`** — Vite/React app in `frontend/`, public and serving everything (catch-all `/`)
-- **`app`** — FastAPI backend at the repo root, internal; reachable only via the public path `POST /fir_analysis`
+- **`app`** — FastAPI backend at the repo root, internal; reachable only via the
+  public paths `POST /fir_analysis` and `POST /timeline_analyze`
 
-The frontend's `/fir_analysis` fetch resolves against the public origin and is
-routed to the backend by Vercel — no CORS and no bindings involved. Set
-`API_KEY` in the project's environment variables in the Vercel dashboard.
+The frontend's `/fir_analysis` and `/timeline_analyze` fetches resolve against
+the public origin and are routed to the backend by Vercel — no CORS and no
+bindings involved. Set `API_KEY` in the project's environment variables in the
+Vercel dashboard.
 
 ## Legacy
 

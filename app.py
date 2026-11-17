@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request, UploadFile, File
+from fastapi import FastAPI, Request, UploadFile, File, Form
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -7,6 +7,7 @@ from openai import OpenAI
 from fastapi.middleware.cors import CORSMiddleware
 import os
 import base64
+import json
 from pathlib import Path
 
 app = FastAPI()
@@ -135,6 +136,117 @@ async def analysis(file: UploadFile = File(...)):
             },
         )
         return {"analysis": response.choices[0].message.content}
+    except Exception as e:
+        return JSONResponse(
+            status_code=500,
+            content={"error": str(e)}
+        )
+
+
+timeline_prompt = """
+You are a legal evidence assistant helping ordinary Indian citizens organize the
+evidence for their case. You are given one evidence file (a document or an image).
+Extract the following and respond with ONLY a single valid JSON object, no
+markdown fences, no extra text:
+{"date": "YYYY-MM-DD" or null, "title": "...", "description": "..."}
+Rules:
+- "date": the single date most relevant to the event this evidence documents
+  (when the incident, message, transaction or record happened - NOT the date it
+  was printed, scanned or uploaded). If the file contains several dates, pick the
+  one of the actual event. If no date can be determined at all, use null.
+- "title": a short human label for this evidence, maximum 6 words.
+- "description": what this evidence shows, in plain English, maximum 30 words.
+"""
+
+
+def _parse_model_json(text: str) -> dict:
+    """Best-effort extraction of a JSON object from a model response."""
+    text = (text or "").strip()
+    if text.startswith("```"):
+        text = text.strip("`")
+        if text.startswith("json"):
+            text = text[4:]
+    start, end = text.find("{"), text.rfind("}")
+    if start == -1 or end == -1:
+        return {}
+    try:
+        data = json.loads(text[start : end + 1])
+        return data if isinstance(data, dict) else {}
+    except ValueError:
+        return {}
+
+
+@app.post("/timeline_analyze")
+async def timeline_analyze(file: UploadFile = File(...), hint_date: str = Form("")):
+    """Suggest a date, title and short description for one evidence file.
+
+    PDFs and images are read by the model; anything else (audio, video, docx...)
+    can't be read by the free model, so the client falls back to the file's own
+    metadata and the user edits it in the timeline.
+    """
+    try:
+        contents = await file.read()
+        content_type = file.content_type or ""
+        filename = (file.filename or "evidence").lower()
+
+        if content_type.startswith("image/"):
+            base64_file = base64.b64encode(contents).decode("utf-8")
+            messages = [
+                {"role": "system", "content": timeline_prompt},
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "text", "text": "Extract the date, title and description of this evidence image."},
+                        {"type": "image_url", "image_url": {"url": f"data:{content_type};base64,{base64_file}"}},
+                    ],
+                },
+            ]
+            extra_body = {}
+            supported = True
+        elif content_type == "application/pdf" or filename.endswith(".pdf"):
+            base64_file = base64.b64encode(contents).decode("utf-8")
+            messages = [
+                {"role": "system", "content": timeline_prompt},
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "text", "text": "Extract the date, title and description of this evidence document."},
+                        {
+                            "type": "file",
+                            "file": {
+                                "filename": file.filename or "evidence.pdf",
+                                "file_data": f"data:application/pdf;base64,{base64_file}",
+                            },
+                        },
+                    ],
+                },
+            ]
+            extra_body = {
+                "plugins": [
+                    {
+                        "id": "file-parser",
+                        "pdf": {"engine": "pdf-text"},
+                    }
+                ]
+            }
+            supported = True
+        else:
+            # Model can't read this kind of file.
+            return {"supported": False, "date": None, "title": "", "description": ""}
+
+        response = client.chat.completions.create(
+            model="openrouter/free",
+            max_tokens=500,
+            messages=messages,
+            extra_body=extra_body,
+        )
+        data = _parse_model_json(response.choices[0].message.content)
+        return {
+            "supported": supported,
+            "date": data.get("date") or None,
+            "title": (data.get("title") or "").strip(),
+            "description": (data.get("description") or "").strip(),
+        }
     except Exception as e:
         return JSONResponse(
             status_code=500,

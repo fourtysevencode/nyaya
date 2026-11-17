@@ -4,6 +4,6 @@
 
 ## Incomplete:
 1. RAG for FIR analysis to provide more contxext to gemini
-2. Timeline generator of evidence.
 
 ## Complete:
+1. Timeline generator of evidence.

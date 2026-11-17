@@ -16,6 +16,10 @@
       "destination": { "service": "app" }
     },
     {
+      "source": "/timeline_analyze",
+      "destination": { "service": "app" }
+    },
+    {
       "source": "/(.*)",
       "destination": { "service": "frontend" }
     }

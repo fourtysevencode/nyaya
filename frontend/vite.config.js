@@ -6,6 +6,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/fir_analysis': 'http://localhost:8000',
+      '/timeline_analyze': 'http://localhost:8000',
     },
   },
 })
