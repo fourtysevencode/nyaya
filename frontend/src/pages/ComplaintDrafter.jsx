@@ -16,6 +16,9 @@ export default function ComplaintDrafter() {
   const [timeline, setTimeline] = useState([])
   const [message, setMessage] = useState('')
   const [copied, setCopied] = useState(false)
+  // Gates the autosave so the first render doesn't wipe the stored draft
+  // with empty values before the restore finishes.
+  const [hydrated, setHydrated] = useState(false)
   const factsRef = useAutoResize()
   const annexRef = useAutoResize()
 
@@ -29,6 +32,7 @@ export default function ComplaintDrafter() {
   // Restore the draft whenever the scenario changes.
   useEffect(() => {
     let active = true
+    setHydrated(false)
     loadDraft(scenarioId)
       .then((draft) => {
         if (!active) return
@@ -37,6 +41,9 @@ export default function ComplaintDrafter() {
         setPicked(draft?.picked ?? [])
       })
       .catch(() => {})
+      .finally(() => {
+        if (active) setHydrated(true)
+      })
     return () => {
       active = false
     }
@@ -44,8 +51,9 @@ export default function ComplaintDrafter() {
 
   // Persist the draft on every change (small object — cheap in IndexedDB).
   useEffect(() => {
+    if (!hydrated) return
     saveDraft(scenarioId, { data, extraAnnexures, picked }).catch(() => {})
-  }, [scenarioId, data, extraAnnexures, picked])
+  }, [scenarioId, data, extraAnnexures, picked, hydrated])
 
   const scenario = SCENARIOS.find((s) => s.id === scenarioId) ?? SCENARIOS[0]
 
