@@ -1298,7 +1298,8 @@ a.card:active {
 
 .editor-input:focus,
 .editor-textarea:focus {
-    outline: none;
+    outline: 2px solid rgba(184, 151, 106, 0.55);
+    outline-offset: 1px;
     border-color: #b8976a;
 }
 
@@ -1442,5 +1443,108 @@ a.card:active {
 
     .btn-danger {
         margin-left: 0;
+    }
+}
+
+/* ---------- Accessibility signals ---------- */
+
+/* Keyboard focus is never invisible. */
+:focus-visible {
+    outline: 2px solid #b8976a;
+    outline-offset: 2px;
+}
+
+/* Touch devices don't hover: don't leave a card stuck in its lifted state
+   after a tap (sticky-hover). */
+@media (hover: none) {
+    a.card:hover,
+    .evidence-card:hover,
+    .helpline:hover {
+        transform: none;
+        box-shadow: 0 2px 6px rgba(26, 26, 26, 0.06);
+    }
+}
+
+/* Reduced motion: same information, gentler delivery — opacity cross-fades
+   instead of anything that moves the inner ear. Colour and state changes stay. */
+@media (prefers-reduced-motion: reduce) {
+    @keyframes fade-in {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+    .timeline-item,
+    .output_bg {
+        animation: fade-in 0.25s ease both;
+    }
+
+    nav a,
+    .nav-logo,
+    .upload-label,
+    .btn-outline,
+    .btn-danger,
+    .filter-chip,
+    .card,
+    .evidence-card,
+    .helpline,
+    .dropzone,
+    .editor-close,
+    .editor-panel {
+        transform: none !important;
+    }
+
+    /* A steady label instead of a fast loop. */
+    .evidence-reading {
+        animation: none;
+        opacity: 1;
+    }
+}
+
+/* Reduced transparency: frost the material fully opaque, drop the blur. */
+@media (prefers-reduced-transparency: reduce) {
+    nav {
+        background-color: #fdf8f3;
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+    }
+
+    .dropzone {
+        background-color: #fffdfa;
+    }
+}
+
+/* More contrast: near-solid chrome with a defined edge instead of a soft
+   gradient, stronger borders on every card. */
+@media (prefers-contrast: more) {
+    nav {
+        background-color: #fdf8f3;
+        border-bottom: 1px solid #6b6b6b;
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+    }
+
+    nav::after {
+        display: none;
+    }
+
+    .filter-chip {
+        border-color: #6b6b6b;
+    }
+
+    .helpline,
+    .rights-card,
+    .letter-preview,
+    .drafter-evidence,
+    .evidence-card {
+        border-color: #6b6b6b;
+    }
+
+    .emergency-card {
+        border-style: solid;
+        border-color: #b8976a;
     }
 }
