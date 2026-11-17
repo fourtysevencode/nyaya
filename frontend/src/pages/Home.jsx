@@ -1,4 +1,32 @@
-const features = ['FIR to Plaintext', 'Evidence Organizer', 'Case Insights']
+import { Link } from 'react-router-dom'
+
+const features = [
+  {
+    to: '/fir-analysis',
+    label: 'FIR to Plaintext',
+    blurb: 'Upload an FIR and get a plain-English summary, the sections explained and clear next steps.',
+  },
+  {
+    to: '/timeline-generator',
+    label: 'Evidence Organizer',
+    blurb: 'Drop in screenshots, voice notes, videos and documents — they are dated, described and laid out on an editable timeline.',
+  },
+  {
+    to: '/section-finder',
+    label: 'Case Insights',
+    blurb: 'Find the law that applies to your situation and what it means, without the jargon.',
+  },
+  {
+    to: '/know-your-rights',
+    label: 'Know Your Rights',
+    blurb: 'What to do when police stop you, refuse your FIR, when money is stolen online, or a college keeps your certificates. Plus an emergency card and helplines.',
+  },
+  {
+    to: '/complaint-drafter',
+    label: 'Draft a Letter',
+    blurb: 'Turn your case into a formal complaint — consumer commission, police, RTI, university or landlord — ready to print, with your timeline evidence attached.',
+  },
+]
 
 export default function Home() {
   return (
@@ -16,10 +44,11 @@ export default function Home() {
       <section id="Features">
         <h2>Features</h2>
         <div className="cards-grid">
-          {features.map((feature) => (
-            <div className="card" key={feature}>
-              <h3>{feature}</h3>
-            </div>
+          {features.map(({ to, label, blurb }) => (
+            <Link className="card card-link" to={to} key={to}>
+              <h3>{label}</h3>
+              <p className="card-blurb">{blurb}</p>
+            </Link>
           ))}
         </div>
       </section>

@@ -77,6 +77,27 @@ nav a:hover {
     border-radius: 9px;
     padding: 24px;
     text-align: center;
+    text-decoration: none;
+    display: block;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+a.card {
+    color: inherit;
+    background-color: #fffdfa;
+}
+
+a.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(26, 26, 26, 0.12);
+}
+
+.card-blurb {
+    font-family: 'Jost', sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    color: #4a4a4a;
+    margin: 10px 0 0;
 }
 
 .card h3 {
@@ -581,6 +602,441 @@ nav a:hover {
 .timeline-empty,
 .timeline-message {
     padding: 1px 40px 30px;
+}
+
+/* ---------- Know Your Rights ---------- */
+
+.rights-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 40px;
+}
+
+.rights-card {
+    background-color: #fffdfa;
+    border: 1px solid #e0d9d0;
+    border-left: 3px solid #c8a97e;
+    border-radius: 10px;
+    padding: 0 22px;
+}
+
+.rights-card summary {
+    cursor: pointer;
+    font-family: 'Jost', sans-serif;
+    font-weight: 500;
+    font-size: 20px;
+    color: #1a1a1a;
+    padding: 16px 0;
+    list-style-position: outside;
+}
+
+.rights-card summary:hover {
+    color: #b8976a;
+}
+
+.rights-summary {
+    font-family: 'Jost', sans-serif;
+    font-size: 17px;
+    color: #6b6b6b;
+    margin: 0 0 14px;
+    max-width: none;
+    padding: 0;
+}
+
+.rights-points {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.rights-points li {
+    padding-left: 14px;
+    border-left: 2px solid #ede7e0;
+}
+
+.rights-points strong {
+    font-family: 'Jost', sans-serif;
+    font-weight: 500;
+    font-size: 16.5px;
+    color: #b8976a;
+    display: block;
+    margin-bottom: 2px;
+}
+
+.rights-points span {
+    font-family: 'Jost', sans-serif;
+    font-size: 16px;
+    line-height: 1.65;
+    color: #4a4a4a;
+}
+
+.rights-cite {
+    font-family: 'Jost', sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.03em;
+    color: #8a8378;
+    margin: 16px 0 18px;
+    max-width: none;
+    padding: 10px 0 0;
+    border-top: 1px dashed #e0d9d0;
+}
+
+.helplines {
+    margin-bottom: 40px;
+}
+
+.helplines h3,
+.emergency h3 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 26px;
+    color: #1a1a1a;
+    margin: 0 0 14px;
+}
+
+.helpline-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+}
+
+.helpline {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    text-decoration: none;
+    background-color: #fffdfa;
+    border: 1px solid #e0d9d0;
+    border-radius: 10px;
+    padding: 14px 16px;
+    transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.helpline:hover {
+    border-color: #b8976a;
+    transform: translateY(-2px);
+}
+
+.helpline-number {
+    font-family: 'Jost', sans-serif;
+    font-weight: 500;
+    font-size: 22px;
+    color: #b8976a;
+}
+
+.helpline-label {
+    font-family: 'Jost', sans-serif;
+    font-size: 13.5px;
+    line-height: 1.45;
+    color: #4a4a4a;
+}
+
+.helpline-note {
+    font-family: 'Jost', sans-serif;
+    font-size: 15px;
+    color: #6b6b6b;
+    max-width: none;
+    padding: 0;
+    margin: 12px 0 0;
+}
+
+.emergency {
+    margin-bottom: 40px;
+}
+
+.emergency-sub {
+    font-family: 'Jost', sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    color: #4a4a4a;
+    max-width: none;
+    padding: 0;
+    margin: 0 0 16px;
+}
+
+.emergency-card {
+    background-color: #fffdfa;
+    border: 2px dashed #c8a97e;
+    border-radius: 12px;
+    padding: 20px 22px;
+}
+
+.emergency-card-title {
+    font-family: 'Jost', sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #8a8378;
+    display: block;
+    margin-bottom: 10px;
+}
+
+.emergency-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px 24px;
+    margin: 0;
+}
+
+.emergency-grid dt {
+    font-family: 'Jost', sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #8a8378;
+}
+
+.emergency-grid dd {
+    font-family: 'Jost', sans-serif;
+    font-size: 17px;
+    color: #1a1a1a;
+    margin: 2px 0 0;
+    overflow-wrap: anywhere;
+}
+
+.emergency-empty {
+    font-family: 'Jost', sans-serif;
+    font-size: 16px;
+    color: #8a8378;
+    max-width: none;
+    padding: 0;
+    margin: 0;
+}
+
+.emergency-fields {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    column-gap: 20px;
+}
+
+.emergency-field .editor-label {
+    margin: 14px 0 6px;
+}
+
+.emergency-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 18px 0 0;
+}
+
+.emergency-actions .upload-label {
+    margin: 0;
+}
+
+.emergency-saved {
+    font-family: 'Jost', sans-serif;
+    font-size: 14px;
+    color: #4e7a5a;
+}
+
+.rights-disclaimer {
+    font-family: 'Jost', sans-serif;
+    font-size: 14px !important;
+    line-height: 1.6;
+    color: #8a8378;
+    border-top: 1px solid #e0d9d0;
+    padding: 16px 0 40px;
+    max-width: none;
+}
+
+/* ---------- Complaint drafter ---------- */
+
+.drafter-scenarios {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.drafter-blurb {
+    font-family: 'Jost', sans-serif;
+    font-size: 17px;
+    color: #6b6b6b;
+    max-width: none;
+    padding: 0;
+    margin: 0 0 24px;
+}
+
+.drafter-form {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    column-gap: 20px;
+}
+
+.drafter-form .drafter-field:nth-last-child(1):nth-child(odd) {
+    grid-column: 1 / -1;
+}
+
+.drafter-field .editor-label {
+    margin: 14px 0 6px;
+}
+
+.drafter-evidence {
+    margin: 24px 0 0;
+    border: 1px solid #e0d9d0;
+    border-radius: 10px;
+    background-color: #fffdfa;
+    padding: 16px 20px;
+}
+
+.drafter-evidence h3 {
+    font-family: 'Jost', sans-serif;
+    font-weight: 500;
+    font-size: 18px;
+    color: #1a1a1a;
+    margin: 0 0 4px;
+}
+
+.drafter-evidence-sub {
+    font-family: 'Jost', sans-serif;
+    font-size: 15px;
+    color: #6b6b6b;
+    max-width: none;
+    padding: 0;
+    margin: 0 0 10px;
+}
+
+.drafter-evidence-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 18px;
+}
+
+.drafter-evidence-list label {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-family: 'Jost', sans-serif;
+    font-size: 15.5px;
+    color: #4a4a4a;
+    cursor: pointer;
+}
+
+.drafter-evidence-list input {
+    accent-color: #b8976a;
+}
+
+.drafter-preview-title {
+    font-family: 'Jost', sans-serif;
+    font-weight: 500;
+    font-size: 18px;
+    color: #1a1a1a;
+    margin: 28px 0 10px;
+}
+
+.letter-preview {
+    background-color: #fffdfa;
+    border: 1px solid #e0d9d0;
+    border-radius: 10px;
+    padding: 26px 30px;
+}
+
+.letter-preview pre {
+    font-family: 'Jost', sans-serif;
+    font-size: 16px;
+    line-height: 1.65;
+    color: #1a1a1a;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    margin: 0;
+}
+
+.drafter-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 18px 0 0;
+}
+
+.drafter-actions .upload-label {
+    margin: 0;
+}
+
+.drafter-note {
+    font-family: 'Jost', sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    color: #6b6b6b;
+    max-width: none;
+    padding: 0 0 40px;
+}
+
+/* Print: show only the emergency card or the letter (#print-target). */
+
+@media print {
+    body {
+        padding: 0;
+        background: #fff;
+    }
+
+    nav,
+    .rights-list,
+    .helplines,
+    .emergency-fields,
+    .emergency-actions,
+    .rights-disclaimer,
+    .drafter-form,
+    .drafter-evidence,
+    .drafter-scenarios,
+    .drafter-blurb,
+    .drafter-actions,
+    .drafter-note,
+    .editor-field,
+    .dropzone,
+    .timeline-toolbar,
+    .timeline,
+    .outputs {
+        display: none !important;
+    }
+
+    body * {
+        visibility: hidden;
+    }
+
+    #print-target,
+    #print-target * {
+        visibility: visible;
+    }
+
+    #print-target {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        padding: 24px;
+        box-sizing: border-box;
+    }
+}
+
+@media (max-width: 768px) {
+    .helpline-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .emergency-grid,
+    .emergency-fields,
+    .drafter-form {
+        grid-template-columns: 1fr;
+    }
+
+    .rights-card summary {
+        font-size: 17px;
+    }
+
+    .letter-preview {
+        padding: 18px 16px;
+    }
+
+    .letter-preview pre {
+        font-size: 14.5px;
+    }
 }
 
 /* Editor modal */

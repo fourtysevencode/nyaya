@@ -6,6 +6,8 @@ import Home from './pages/Home.jsx'
 import FirAnalysis from './pages/FirAnalysis.jsx'
 import SectionFinder from './pages/SectionFinder.jsx'
 import TimelineGenerator from './pages/TimelineGenerator.jsx'
+import KnowYourRights from './pages/KnowYourRights.jsx'
+import ComplaintDrafter from './pages/ComplaintDrafter.jsx'
 import './index.css'
 
 createRoot(document.getElementById('root')).render(
@@ -17,6 +19,8 @@ createRoot(document.getElementById('root')).render(
           <Route path="/fir-analysis" element={<FirAnalysis />} />
           <Route path="/section-finder" element={<SectionFinder />} />
           <Route path="/timeline-generator" element={<TimelineGenerator />} />
+          <Route path="/know-your-rights" element={<KnowYourRights />} />
+          <Route path="/complaint-drafter" element={<ComplaintDrafter />} />
         </Route>
       </Routes>
     </BrowserRouter>

@@ -1,5 +1,27 @@
 # Nyaya
 
+AI-powered legal help for ordinary Indian citizens and students — FIRs explained,
+evidence organised, rights made plain, and letters that get taken seriously.
+
+## Features
+
+- **FIR Analysis** (`/fir-analysis`) — upload an FIR and get a plain-English
+  summary, the sections explained and practical next steps.
+- **Section Finder** (`/section-finder`) — look up IPC/BNS sections in plain language.
+- **Timeline Generator** (`/timeline-generator`) — drop in evidence (documents,
+  screenshots, voice notes, video); each item is dated and described (AI where
+  possible, file metadata otherwise) and laid out on an editable timeline.
+  Everything stays in the browser (IndexedDB), exportable as a ZIP.
+- **Know Your Rights** (`/know-your-rights`) — plain-language cards for police
+  stops, arrests (D.K. Basu safeguards), refused FIRs, cyber fraud, consumer
+  disputes, student fee/certificate/ragging issues, women's safety and free
+  legal aid, plus verified helplines and a printable offline emergency card.
+- **Draft a Letter** (`/complaint-drafter`) — turn your situation into a formal
+  complaint/application (consumer commission, police, RTI, university grievance,
+  landlord deposit notice) with the relevant statutes cited, enclosures pulled
+  from your timeline, and copy/download/print output. Works fully offline —
+  no AI required.
+
 ## Local dev
 
 ```

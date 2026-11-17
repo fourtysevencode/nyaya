@@ -5,6 +5,8 @@ const links = [
   { to: '/fir-analysis', label: 'FIR Analysis' },
   { to: '/section-finder', label: 'Section Finder' },
   { to: '/timeline-generator', label: 'Timeline' },
+  { to: '/know-your-rights', label: 'Your Rights' },
+  { to: '/complaint-drafter', label: 'Draft a Letter' },
 ]
 
 export default function Layout() {
