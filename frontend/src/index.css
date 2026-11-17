@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Jost:wght@300;400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:opsz,wght@5..1200,400..700&family=Jost:wght@300;400;500&display=swap');
 
 body {
     margin: 0;
@@ -97,10 +97,16 @@ nav a.active {
     background-color: rgba(200, 169, 126, 0.2);
 }
 
+/* Display type: tracking and leading are size-specific. Large Playfair
+   gets negative tracking and tight leading; the variable opsz axis lets
+   the browser pick the display-optical cut at these sizes. */
 h1 {
     color: #1a1a1a;
     font-family: 'Playfair Display', Georgia, serif;
-    font-size: 105.6px;
+    font-size: clamp(56px, 9vw, 105.6px);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    font-optical-sizing: auto;
     margin: 0;
     padding: 0 0 0 24px;
     border-left: 2px solid #c8a97e;
@@ -109,7 +115,10 @@ h1 {
 h2 {
     color: #1a1a1a;
     font-family: 'Playfair Display', Georgia, serif;
-    font-size: 63.36px;
+    font-size: clamp(32px, 5.4vw, 63.36px);
+    line-height: 1.08;
+    letter-spacing: -0.015em;
+    font-optical-sizing: auto;
     margin: 0 0 32px 0;
     padding: 0;
 }
@@ -272,12 +281,10 @@ a.card:active {
     }
 
     h1 {
-        font-size: 42px;
         padding-left: 12px;
     }
 
     h2 {
-        font-size: 28px;
         margin-bottom: 20px;
     }
 
@@ -818,6 +825,8 @@ a.card:active {
 .emergency h3 {
     font-family: 'Playfair Display', Georgia, serif;
     font-size: 26px;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
     color: #1a1a1a;
     margin: 0 0 14px;
 }
