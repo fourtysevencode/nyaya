@@ -252,6 +252,39 @@ nav a:hover {
 
 /* ---------- Timeline Generator ---------- */
 
+/* One centered column so the heading, dropzone, toolbar and timeline all
+   share the same edges (the timeline row is 130px spine + 20px gap + 760px
+   card = 910px wide). */
+.page-narrow {
+    max-width: 910px;
+    margin: 0 auto;
+}
+
+.page-narrow #fir_title {
+    padding: 80px 0 1px;
+}
+
+.page-narrow #fir-subtext {
+    padding: 1px 0 40px;
+}
+
+.page-narrow .dropzone {
+    max-width: none;
+}
+
+.page-narrow .timeline-toolbar {
+    padding: 20px 0;
+}
+
+.page-narrow .timeline {
+    padding: 0 0 60px;
+}
+
+.page-narrow .timeline-empty,
+.page-narrow .timeline-message {
+    padding: 1px 0 30px;
+}
+
 .dropzone {
     max-width: 990px;
     margin: 0 auto 8px;
@@ -346,7 +379,8 @@ nav a:hover {
     position: absolute;
     top: 12px;
     bottom: 12px;
-    left: 122px;
+    /* centred on the node: spine (130px) - node half-width (10px) - 1px */
+    left: 119px;
     width: 2px;
     background-color: #e0d9d0;
 }
@@ -699,6 +733,27 @@ nav a:hover {
     .dropzone {
         margin: 0 0 8px;
         padding: 28px 16px;
+    }
+
+    .page-narrow #fir_title {
+        padding: 40px 0 1px;
+    }
+
+    .page-narrow #fir-subtext {
+        padding: 1px 0 24px;
+    }
+
+    .page-narrow .timeline-toolbar {
+        padding: 14px 0;
+    }
+
+    .page-narrow .timeline {
+        padding: 0 0 40px;
+    }
+
+    .page-narrow .timeline-empty,
+    .page-narrow .timeline-message {
+        padding: 1px 0 20px;
     }
 
     .timeline-toolbar {

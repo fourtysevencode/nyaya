@@ -164,7 +164,7 @@ export default function TimelineGenerator() {
   const editing = items.find((item) => item.id === editingId) ?? null
 
   return (
-    <>
+    <div className="page-narrow">
       <h2 id="fir_title">Timeline Generator</h2>
       <p id="fir-subtext">
         Upload all your evidence — documents, screenshots, voice notes, videos. Each item is dated
@@ -257,6 +257,6 @@ export default function TimelineGenerator() {
           onDelete={handleDelete}
         />
       )}
-    </>
+    </div>
   )
 }

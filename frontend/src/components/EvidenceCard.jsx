@@ -1,13 +1,24 @@
+import { useState } from 'react'
 import { useObjectUrl } from '../hooks/useObjectUrl.js'
 import { TYPES, formatDate } from '../lib/evidence.js'
 
 function Thumb({ item }) {
   const url = useObjectUrl(item.blob)
   const type = TYPES[item.typeId] ?? TYPES.other
+  // iPhone photos are HEIC/HEIF, which many browsers can't paint — fall back
+  // to a plain file block instead of a broken image.
+  const [broken, setBroken] = useState(false)
 
   if (!url) return null
-  if (item.typeId === 'image') {
-    return <img className="evidence-thumb" src={url} alt={item.title || item.name} />
+  if (item.typeId === 'image' && !broken) {
+    return (
+      <img
+        className="evidence-thumb"
+        src={url}
+        alt={item.title || item.name}
+        onError={() => setBroken(true)}
+      />
+    )
   }
   if (item.typeId === 'video') {
     // #t=0.1 nudges browsers into showing the first frame as the poster.
