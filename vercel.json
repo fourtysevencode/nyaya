@@ -20,6 +20,10 @@
       "destination": { "service": "app" }
     },
     {
+      "source": "/section_analysis",
+      "destination": { "service": "app" }
+    },
+    {
       "source": "/(.*)",
       "destination": { "service": "frontend" }
     }

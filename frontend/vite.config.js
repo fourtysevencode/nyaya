@@ -7,6 +7,7 @@ export default defineConfig({
     proxy: {
       '/fir_analysis': 'http://localhost:8000',
       '/timeline_analyze': 'http://localhost:8000',
+      '/section_analysis': 'http://localhost:8000',
     },
   },
 })

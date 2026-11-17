@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import DOMPurify from 'dompurify'
 import { marked } from 'marked'
 
 const STATUS = {
@@ -54,7 +55,7 @@ export default function FirAnalysis() {
         return
       }
 
-      setAnalysis(marked.parse(data.analysis))
+      setAnalysis(DOMPurify.sanitize(marked.parse(data.analysis)))
       setStatus(STATUS.DONE)
       setMessage('')
     } catch {
@@ -64,7 +65,7 @@ export default function FirAnalysis() {
   }
 
   return (
-    <>
+    <div className="page-narrow">
       <h2 id="fir_title">FIR Analysis</h2>
       <p id="fir-subtext">Upload any FIR as a PDF and get a detailed summary!</p>
 
@@ -97,6 +98,6 @@ export default function FirAnalysis() {
           )}
         </div>
       </section>
-    </>
+    </div>
   )
 }

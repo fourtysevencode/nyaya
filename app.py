@@ -149,6 +149,80 @@ async def analysis(file: UploadFile = File(...)):
         )
 
 
+@app.post("/section_analysis")
+async def section_analysis(request: Request):
+    """Suggest the Indian law sections that may apply to a described situation.
+
+    Input is JSON: {"situation": "..."}. Output is markdown, the same shape as
+    /fir_analysis returns, so the client can render and sanitise it the same way.
+    """
+    try:
+        body = await request.json()
+        situation = str(body.get("situation") or "").strip()
+        if not situation:
+            return JSONResponse(
+                status_code=400,
+                content={"error": "Please describe your situation first."},
+            )
+        if len(situation) > 4000:
+            situation = situation[:4000]
+
+        response = client.chat.completions.create(
+            model="openrouter/free",
+            max_tokens=2000,
+            messages=[
+                {"role": "system", "content": sections_prompt},
+                {"role": "user", "content": situation},
+            ],
+        )
+        # Free models answer in odd shapes (content lists, reasoning-only);
+        # _message_text handles those, same as the timeline endpoint.
+        analysis = _strip_fence(_message_text(response.choices[0].message))
+        if not analysis:
+            return JSONResponse(
+                status_code=502,
+                content={"error": "The analysis came back empty. Please try again."},
+            )
+        return {"analysis": analysis}
+    except Exception as e:
+        logger.exception("section_analysis failed")
+        return JSONResponse(
+            status_code=500,
+            content={"error": str(e)}
+        )
+
+
+# Plain-language legal sections for a described situation (Section Finder).
+sections_prompt = """
+You are a legal assistant helping ordinary Indian citizens understand which laws
+apply to their situation. The user describes what happened to them in their own
+words. Respond ONLY in markdown, in this exact structure:
+
+## What likely happened
+One or two plain-English sentences reflecting the situation back, without judgement.
+
+## Sections that may apply
+For each applicable section of Indian law (prefer the BNS/BNSS 2023 numbering,
+mentioning the old IPC equivalent in brackets, since most people know those numbers):
+- **Section number — short name**: what it means in plain English, and why it may
+  fit this situation.
+
+## What you can do next
+3-5 practical steps in simple language (police complaint, evidence to keep and
+where, which authority to approach).
+
+## Important
+One short paragraph: this is general information, not legal advice; the exact
+section depends on the facts; a free lawyer is available through the District
+Legal Services Authority (helpline 15100).
+
+Rules:
+- Write for someone with no legal background; explain any jargon you use.
+- Only include sections you are confident about. Never invent section numbers.
+- Say plainly when key facts are missing and which sections would depend on them.
+- Be concise and compassionate — the reader may be in a stressful situation.
+"""
+
 timeline_prompt = """
 You are a legal evidence assistant helping ordinary Indian citizens organize the
 evidence for their case. You are given one evidence file (a document or an image).
@@ -170,9 +244,12 @@ def _strip_fence(text: str) -> str:
     text = (text or "").strip()
     if text.startswith("```"):
         text = text.strip("`")
-        if text.startswith("json"):
-            text = text[4:]
-    return text
+        # ```json / ```markdown ... — drop a bare language tag on the first
+        # line (but never real content, which always has more on that line).
+        first, _, rest = text.partition("\n")
+        if rest and re.fullmatch(r"[A-Za-z0-9_-]+", first.strip()):
+            text = rest
+    return text.strip()
 
 
 def _message_text(message) -> str:

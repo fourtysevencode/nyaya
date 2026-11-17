@@ -7,7 +7,9 @@ evidence organised, rights made plain, and letters that get taken seriously.
 
 - **FIR Analysis** (`/fir-analysis`) — upload an FIR and get a plain-English
   summary, the sections explained and practical next steps.
-- **Section Finder** (`/section-finder`) — look up IPC/BNS sections in plain language.
+- **Section Finder** (`/section-finder`) — describe your situation and get the
+  BNS/IPC sections that may apply, each explained in plain language, with next
+  steps (backend: `POST /section_analysis`).
 - **Timeline Generator** (`/timeline-generator`) — drop in evidence (documents,
   screenshots, voice notes, video); each item is dated and described (AI where
   possible, file metadata otherwise) and laid out on an editable timeline.
@@ -39,7 +41,8 @@ Vercel deploys this repo as one project with two services (`vercel.json`):
 
 - **`frontend`** — Vite/React app in `frontend/`, public and serving everything (catch-all `/`)
 - **`app`** — FastAPI backend at the repo root, internal; reachable only via the
-  public paths `POST /fir_analysis` and `POST /timeline_analyze`
+  public paths `POST /fir_analysis`, `POST /timeline_analyze` and
+  `POST /section_analysis`
 
 The frontend's `/fir_analysis` and `/timeline_analyze` fetches resolve against
 the public origin and are routed to the backend by Vercel — no CORS and no
