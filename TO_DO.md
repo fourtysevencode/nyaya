@@ -12,3 +12,4 @@
 4. Complaint/letter drafter (consumer, police, RTI, university, landlord) with enclosures pulled from the timeline.
 5. Apple-design pass: translucent sticky nav with scroll-edge effect, press feedback on every control, symmetric editor modal, size-specific typography, reduced-motion/transparency/contrast support.
 6. Section Finder completed end-to-end (`/section_analysis`), AI markdown sanitised with DOMPurify, all pages share one centered column.
+7. Timeline "clear all" (two-step, auto-expiring confirm) to start a new timeline.

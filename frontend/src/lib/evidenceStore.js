@@ -1,4 +1,4 @@
-import { createStore, set, del, entries } from 'idb-keyval'
+import { createStore, set, del, entries, clear } from 'idb-keyval'
 
 /**
  * Every piece of evidence (file blob + metadata) lives in the browser's
@@ -26,4 +26,8 @@ export function saveItem(item) {
 
 export function deleteItem(id) {
   return del(id, itemStore)
+}
+
+export function clearItems() {
+  return clear(itemStore)
 }

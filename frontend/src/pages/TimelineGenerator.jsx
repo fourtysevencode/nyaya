@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import EvidenceCard from '../components/EvidenceCard.jsx'
 import EvidenceEditor from '../components/EvidenceEditor.jsx'
-import { loadItems, saveItem, deleteItem } from '../lib/evidenceStore.js'
+import { clearItems, loadItems, saveItem, deleteItem } from '../lib/evidenceStore.js'
 import {
   TYPES,
   TYPE_IDS,
@@ -29,6 +29,17 @@ export default function TimelineGenerator() {
   const [zipping, setZipping] = useState(false)
   const [dragOver, setDragOver] = useState(false)
   const [message, setMessage] = useState('')
+  const [messageTone, setMessageTone] = useState('error')
+  const [confirmClear, setConfirmClear] = useState(false)
+
+  // "Clear all" is destructive and irreversible, so it needs a deliberate
+  // second press — but the armed state expires, so a stray click can't sit
+  // there waiting to wipe everything much later.
+  useEffect(() => {
+    if (!confirmClear) return
+    const timer = setTimeout(() => setConfirmClear(false), 4000)
+    return () => clearTimeout(timer)
+  }, [confirmClear])
 
   useEffect(() => {
     loadItems()
@@ -135,6 +146,23 @@ export default function TimelineGenerator() {
     deleteItem(id).catch(() => {})
   }
 
+  const handleClearAll = async () => {
+    if (!confirmClear) {
+      setConfirmClear(true)
+      return
+    }
+    setConfirmClear(false)
+    try {
+      await clearItems()
+      setItems([])
+      setMessageTone('ok')
+      setMessage('Timeline cleared — you are starting fresh.')
+    } catch {
+      setMessageTone('error')
+      setMessage('Could not clear the saved evidence. Please try again.')
+    }
+  }
+
   const handleDownload = async () => {
     setZipping(true)
     setMessage('')
@@ -196,7 +224,11 @@ export default function TimelineGenerator() {
         />
       </div>
 
-      {message && <p className="outputs error timeline-message">{message}</p>}
+      {message && (
+        <p className={`outputs timeline-message${messageTone === 'error' ? ' error' : ''}`}>
+          {message}
+        </p>
+      )}
 
       {items.length > 0 && (
         <div className="timeline-toolbar">
@@ -214,14 +246,24 @@ export default function TimelineGenerator() {
               </button>
             ))}
           </div>
-          <button
-            type="button"
-            className="upload-label zip-btn"
-            onClick={handleDownload}
-            disabled={zipping}
-          >
-            {zipping ? 'packing...' : 'download zip'}
-          </button>
+          <div className="toolbar-actions">
+            <button
+              type="button"
+              className="upload-label zip-btn"
+              onClick={handleDownload}
+              disabled={zipping}
+            >
+              {zipping ? 'packing...' : 'download zip'}
+            </button>
+            <button
+              type="button"
+              className={`btn-clear${confirmClear ? ' confirm' : ''}`}
+              onClick={handleClearAll}
+              title="Delete every item and start a new timeline"
+            >
+              {confirmClear ? 'clear all — sure?' : 'clear all'}
+            </button>
+          </div>
         </div>
       )}
 
