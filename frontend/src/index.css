@@ -253,7 +253,8 @@ nav a:hover {
 /* ---------- Timeline Generator ---------- */
 
 .dropzone {
-    margin: 0 40px 8px;
+    max-width: 990px;
+    margin: 0 auto 8px;
     padding: 40px 24px;
     border: 2px dashed #c8a97e;
     border-radius: 12px;

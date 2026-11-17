@@ -156,6 +156,7 @@ Extract the following and respond with ONLY a single valid JSON object, no
 markdown fences, no extra text:
 {"date": "YYYY-MM-DD" or null, "title": "...", "description": "..."}
 Rules:
+- Use straight double quotes and valid JSON - no markdown, no trailing commas.
 - "date": the single date most relevant to the event this evidence documents
   (when the incident, message, transaction or record happened - NOT the date it
   was printed, scanned or uploaded). If the file contains several dates, pick the
@@ -172,6 +173,13 @@ def _parse_model_json(text: str) -> dict:
         text = text.strip("`")
         if text.startswith("json"):
             text = text[4:]
+    # Free models love curly/smart quotes, which break strict JSON parsing.
+    text = (
+        text.replace("\u201c", '"')
+        .replace("\u201d", '"')
+        .replace("\u2018", "'")
+        .replace("\u2019", "'")
+    )
     start, end = text.find("{"), text.rfind("}")
     if start == -1 or end == -1:
         return {}
@@ -181,12 +189,34 @@ def _parse_model_json(text: str) -> dict:
         return data if isinstance(data, dict) else {}
     except ValueError:
         pass
-    # Free models sometimes answer in Python literals ('single quotes').
+    # Python-style literals ('single quotes', None, trailing commas).
     try:
         data = ast.literal_eval(snippet)
         return data if isinstance(data, dict) else {}
     except (ValueError, SyntaxError):
         return {}
+
+
+def _salvage_fields(text: str) -> dict:
+    """Last resort: regex the fields out of almost-JSON output.
+
+    Runs when JSON parsing fails entirely, which happens with weaker free
+    models (unescaped quotes inside strings are enough to break it).
+    """
+    text = text or ""
+    salvaged = {}
+    date_match = re.search(r'"date"\s*:\s*"?(\d{4}-\d{2}-\d{2})', text, re.I)
+    if date_match:
+        salvaged["date"] = date_match.group(1)
+    title_match = re.search(r'"(?:title|name|label)"\s*:\s*"([^"\n]{2,120})"', text, re.I)
+    if title_match:
+        salvaged["title"] = title_match.group(1)
+    description_match = re.search(
+        r'"(?:description|summary|desc)"\s*:\s*"([^"\n]{2,600})"', text, re.I
+    )
+    if description_match:
+        salvaged["description"] = description_match.group(1)
+    return salvaged
 
 
 _DATE_FORMATS = (
@@ -288,13 +318,19 @@ async def timeline_analyze(file: UploadFile = File(...), hint_date: str = Form("
         raw = response.choices[0].message.content
         logger.info("timeline: raw model output for %s: %r", filename, (raw or "")[:500])
         data = _parse_model_json(raw)
+        if not (data.get("date") or data.get("title") or data.get("description")):
+            data = _salvage_fields(raw)
+            if data:
+                logger.warning("timeline: JSON parse failed, salvaged fields via regex for %s", filename)
         if not data:
-            logger.warning("timeline: could not parse model output for %s", filename)
+            logger.warning("timeline: could not extract anything from model output for %s", filename)
+        title = (data.get("title") or data.get("name") or data.get("label") or "").strip()
+        description = (data.get("description") or data.get("summary") or data.get("desc") or "").strip()
         return {
             "supported": supported,
             "date": _normalise_date(data.get("date")),
-            "title": (data.get("title") or "").strip(),
-            "description": (data.get("description") or "").strip(),
+            "title": title,
+            "description": description,
         }
     except Exception as e:
         logger.exception("timeline_analyze failed for %s", locals().get("filename", "?"))

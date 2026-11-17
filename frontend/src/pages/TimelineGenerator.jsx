@@ -9,6 +9,7 @@ import {
   detectType,
   downloadBlob,
   fileDate,
+  formatDate,
   todayISO,
 } from '../lib/evidence.js'
 
@@ -238,7 +239,7 @@ export default function TimelineGenerator() {
             {visible.map((item) => (
               <li key={item.id} className="timeline-item">
                 <div className="timeline-spine">
-                  <span className="timeline-when">{item.date || 'undated'}</span>
+                  <span className="timeline-when">{formatDate(item.date) || 'undated'}</span>
                   <span className="timeline-node" style={{ '--type-color': (TYPES[item.typeId] ?? TYPES.other).color }} />
                 </div>
                 <EvidenceCard item={item} onEdit={setEditingId} />
