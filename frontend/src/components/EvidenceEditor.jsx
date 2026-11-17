@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useAutoResize } from '../hooks/useAutoResize.js'
 import { useObjectUrl } from '../hooks/useObjectUrl.js'
 import { TYPES, formatDate } from '../lib/evidence.js'
@@ -20,6 +20,9 @@ function AudioPreview({ item }) {
   return <audio className="editor-audio" src={url} controls preload="metadata" />
 }
 
+/** How long the exit transition runs (must match the CSS). */
+const CLOSE_MS = 240
+
 export default function EvidenceEditor({ item, onClose, onSave, onDelete }) {
   const [draft, setDraft] = useState({
     date: item.date || '',
@@ -28,17 +31,36 @@ export default function EvidenceEditor({ item, onClose, onSave, onDelete }) {
     notes: item.notes || '',
   })
   const [confirmDelete, setConfirmDelete] = useState(false)
+  // `open` drives a symmetric enter/exit transition: the panel scales and
+  // fades from its centre, and leaving reverses exactly that path.
+  const [open, setOpen] = useState(false)
+  const closingRef = useRef(false)
   const descriptionRef = useAutoResize()
   const notesRef = useAutoResize()
   const type = TYPES[item.typeId] ?? TYPES.other
 
   useEffect(() => {
+    // Enter on the next frame so the hidden state paints first.
+    const raf = requestAnimationFrame(() => setOpen(true))
+    return () => cancelAnimationFrame(raf)
+  }, [])
+
+  useEffect(() => {
     const onKey = (e) => {
-      if (e.key === 'Escape') onClose()
+      if (e.key === 'Escape') requestClose()
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [onClose])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  /** Every exit path runs the same reverse animation, then unmounts. */
+  const requestClose = () => {
+    if (closingRef.current) return
+    closingRef.current = true
+    setOpen(false)
+    setTimeout(onClose, CLOSE_MS)
+  }
 
   const set = (field) => (e) => setDraft((prev) => ({ ...prev, [field]: e.target.value }))
 
@@ -50,7 +72,7 @@ export default function EvidenceEditor({ item, onClose, onSave, onDelete }) {
       notes: draft.notes.trim(),
       dateSource: draft.date === item.date ? item.dateSource : 'manual',
     })
-    onClose()
+    requestClose()
   }
 
   const handleDelete = () => {
@@ -59,18 +81,18 @@ export default function EvidenceEditor({ item, onClose, onSave, onDelete }) {
       return
     }
     onDelete(item.id)
-    onClose()
+    requestClose()
   }
 
   return (
     <div
-      className="editor-overlay"
+      className={`editor-overlay${open ? ' open' : ''}`}
       onClick={(e) => {
-        if (e.target === e.currentTarget) onClose()
+        if (e.target === e.currentTarget) requestClose()
       }}
     >
       <div className="editor-panel" role="dialog" aria-modal="true" aria-label={`Edit ${item.name}`}>
-        <button type="button" className="editor-close" onClick={onClose} aria-label="Close">
+        <button type="button" className="editor-close" onClick={requestClose} aria-label="Close">
           &times;
         </button>
         <span className="evidence-type" style={{ '--type-color': type.color }}>
@@ -133,10 +155,14 @@ export default function EvidenceEditor({ item, onClose, onSave, onDelete }) {
           <button type="button" className="upload-label" onClick={handleSave}>
             save
           </button>
-          <button type="button" className="btn-outline" onClick={onClose}>
+          <button type="button" className="btn-outline" onClick={requestClose}>
             cancel
           </button>
-          <button type="button" className={`btn-danger${confirmDelete ? ' confirm' : ''}`} onClick={handleDelete}>
+          <button
+            type="button"
+            className={`btn-danger${confirmDelete ? ' confirm' : ''}`}
+            onClick={handleDelete}
+          >
             {confirmDelete ? 'really delete?' : 'delete'}
           </button>
         </div>
